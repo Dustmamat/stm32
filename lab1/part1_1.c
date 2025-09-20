@@ -1,0 +1,37 @@
+#define MYWAIT 1000000
+int main(void)
+{
+ //PORT REGISTERS
+ volatile unsigned int *GPIOA_MODER = (unsigned int*) (0x40020000 + 0x00);
+ volatile unsigned int *GPIOA_ODR = (unsigned int*) (0x40020000 + 0x14);
+
+ volatile unsigned int *GPIOC_MODER = (unsigned int*)(0x40020000 + 0x0800 + 0x00);
+ volatile unsigned int *GPIOC_IDR = (unsigned int*) (0x40020000 + 0x0800 + 0x10);
+
+ //CLOCK REGISTERS
+ volatile unsigned int *RCC_AHB1ENR = (unsigned int*) (0x40023800 + 0x30);
+ //VARIABLES
+ int i;
+ //ENABLE PORT CLOCK:
+ // this ensure that the peripheral is enabled and connected to the AHB1 bus
+ *RCC_AHB1ENR |= 0x05U;
+ //CONFIGURE PORT: set MODER[11:10] = 0x1
+ *GPIOA_MODER = *GPIOA_MODER | 0x400;
+ *GPIOC_MODER |= 0x00; //Since input requires 00: bits 27 and 26
+
+ //KEEP OFF THE LED: set ODR[5] = 0x0, that is pulls PA5 LOW
+
+ // Application code (Infinite loop)
+ while (1)
+ {
+ // Add your code here.
+	 // if button is pressed switch LED on
+	 if((*GPIOC_IDR & (1<<13)) == 0x00){
+		 *GPIOA_ODR |= 0x20;
+	 }
+	 //button is released switch LED off
+	 else
+		 *GPIOA_ODR = *GPIOA_ODR & (~(0x20));
+
+}
+}
